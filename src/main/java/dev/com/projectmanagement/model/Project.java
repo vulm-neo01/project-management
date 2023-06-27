@@ -1,10 +1,13 @@
 package dev.com.projectmanagement.model;
 
+import dev.com.projectmanagement.model.stable.Role;
+import dev.com.projectmanagement.model.stable.Progress;
 import lombok.*;
 import org.springframework.data.annotation.Id;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Map;
 
 @Data
 @AllArgsConstructor
@@ -21,9 +24,7 @@ public class Project {
     private String createdBy;
     private LocalDate startDate;
     private LocalDate endDate;
-    private List<String> managerIds;
-    private List<String> memberIds;
-    private List<String> customerIds;
+    private Map<String, Role> users;
     private List<String> taskIds;
     private List<String> docIds;
 

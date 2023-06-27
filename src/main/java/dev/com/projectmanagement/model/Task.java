@@ -1,7 +1,8 @@
 package dev.com.projectmanagement.model;
 
+import dev.com.projectmanagement.model.stable.Priority;
+import dev.com.projectmanagement.model.stable.Progress;
 import lombok.*;
-import org.springframework.cglib.core.Local;
 import org.springframework.data.annotation.Id;
 
 import java.time.LocalDate;
@@ -24,7 +25,6 @@ public class Task {
     private LocalDate startDate;
     private LocalDate endDate;
     private List<String> memberIds;
-    private List<String> customerIds;
     private List<String> docIds;
 
     public Task(String description, String taskName, Priority priority, String createdBy) {

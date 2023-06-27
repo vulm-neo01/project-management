@@ -5,7 +5,10 @@ import dev.com.projectmanagement.repository.NoteRepository;
 import dev.com.projectmanagement.service.NoteService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.neo4j.Neo4jProperties;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
@@ -30,6 +33,9 @@ public class NoteImpl implements NoteService {
 
     @Override
     public String insertNote(Note note){
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String currentUserId = authentication.getName();
+        note.setCreatedBy(currentUserId);
         return noteRepository.save(note).toString();
     }
 

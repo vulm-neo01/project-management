@@ -1,4 +1,4 @@
-package dev.com.projectmanagement.model;
+package dev.com.projectmanagement.model.stable;
 
 public enum Priority {
     LOW,

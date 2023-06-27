@@ -6,6 +6,8 @@ import dev.com.projectmanagement.service.ProjectService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
@@ -30,6 +32,9 @@ public class ProjectImpl implements ProjectService {
 
     @Override
     public Project createNew(Project project){
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String currentUserId = authentication.getName();
+        project.setCreatedBy(currentUserId);
         return projectRepository.insert(project);
     }
 
