@@ -1,18 +1,23 @@
 package dev.com.projectmanagement.model;
 
+import dev.com.projectmanagement.model.stable.UserRole;
 import jakarta.validation.constraints.Email;
 import lombok.*;
 import org.springframework.data.annotation.Id;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.userdetails.UserDetails;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.Collection;
 import java.util.List;
 
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class User {
+public class User{
     @Id
     @Generated
     private String userId;
@@ -26,6 +31,7 @@ public class User {
     private LocalDate birthday;
     private String address;
     private LocalDateTime createdDate;
+    private UserRole role;
     private List<String> projectIds;
     private List<String> taskIds;
     private List<String> noteIds;
@@ -39,6 +45,7 @@ public class User {
         this.birthday = birthday;
         this.address = address;
         this.createdDate = LocalDateTime.now();
+        this.role = UserRole.USER;
     }
 
     public User(String password) {
@@ -53,4 +60,29 @@ public class User {
         this.birthday = birthday;
         this.address = address;
     }
+
+//    @Override
+//    public Collection<? extends GrantedAuthority> getAuthorities() {
+//        return List.of(new SimpleGrantedAuthority(role.name()));
+//    }
+//
+//    @Override
+//    public boolean isAccountNonExpired() {
+//        return true;
+//    }
+//
+//    @Override
+//    public boolean isAccountNonLocked() {
+//        return true;
+//    }
+//
+//    @Override
+//    public boolean isCredentialsNonExpired() {
+//        return true;
+//    }
+//
+//    @Override
+//    public boolean isEnabled() {
+//        return true;
+//    }
 }
