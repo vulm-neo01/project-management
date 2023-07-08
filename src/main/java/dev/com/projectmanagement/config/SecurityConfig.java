@@ -26,24 +26,26 @@ public class SecurityConfig {
 //    private final AuthenticationProvider authenticationProvider;
 //    private final LogoutHandler logoutHandler;
 
+    private static final String[] WHITE_LIST = {
+                        "/api/**",
+                        "/api/auth/**",
+                        "/v2/api-docs",
+                        "/v3/api-docs",
+                        "/v3/api-docs/**",
+                        "/swagger-resources",
+                        "/swagger-resources/**",
+                        "/configuration/ui",
+                        "/configuration/security",
+                        "/swagger-ui/**",
+                        "/webjars/**",
+                        "/swagger-ui.html"
+    };
+
     @Bean
     SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception{
-        return http.csrf().disable()
+        return http.sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS).and()
                 .authorizeHttpRequests()
-//                .requestMatchers(
-//                        "/api/**",
-//                        "/api/auth/**",
-//                        "/v2/api-docs",
-//                        "/v3/api-docs",
-//                        "/v3/api-docs/**",
-//                        "/swagger-resources",
-//                        "/swagger-resources/**",
-//                        "/configuration/ui",
-//                        "/configuration/security",
-//                        "/swagger-ui/**",
-//                        "/webjars/**",
-//                        "/swagger-ui.html"
-//                )
+                .requestMatchers(WHITE_LIST).permitAll()
                 .anyRequest()
                 .permitAll()
 //                .anyRequest().authenticated()
@@ -55,6 +57,8 @@ public class SecurityConfig {
 //                .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class)
                 .headers(headers -> headers.frameOptions().sameOrigin())
                 .httpBasic(Customizer.withDefaults())
+                .cors().and()
+                .csrf().disable()
                 .build();
     }
 

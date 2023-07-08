@@ -13,14 +13,19 @@ public class Document {
     @Id
     @Generated
     private String docId;
+    private String name;
     private String description;
+    private byte[] docData;
+    private String type;
     private LocalDate uploadDate;
     private String uploadBy;
 
-    public Document(String description, String uploadBy) {
+    public Document(String name, String description, String uploadBy, String type) {
+        this.name = name;
         this.description = description;
         this.uploadDate = LocalDate.now();
         this.uploadBy = uploadBy;
+        this.type = type;
     }
 
     public Document(String description) {
