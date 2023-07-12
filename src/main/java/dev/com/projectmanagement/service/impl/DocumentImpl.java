@@ -27,6 +27,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Stream;
@@ -90,7 +91,7 @@ public class DocumentImpl implements DocumentService {
         Document document = documentRepository.save(Document.builder()
                         .name(file.getOriginalFilename())
                         .description("")
-                        .docData(FileUtils.compressFile(file.getBytes()))
+                        .docData(file.getBytes())
                         .type(file.getContentType())
                         .uploadBy(String.valueOf(SecurityContextHolder.getContext().getAuthentication()))
                         .uploadDate(LocalDate.now())
@@ -104,7 +105,7 @@ public class DocumentImpl implements DocumentService {
     @Override
     public byte[] downloadFile(String id){
         Optional<Document> doc = documentRepository.findById(id);
-        byte[] file = FileUtils.decompressFile(doc.get().getDocData());
+        byte[] file = doc.get().getDocData();
 
         return file;
     }

@@ -5,6 +5,9 @@ import dev.com.projectmanagement.model.Document;
 import dev.com.projectmanagement.model.response.ResponseFile;
 import dev.com.projectmanagement.repository.DocumentRepository;
 import dev.com.projectmanagement.service.DocumentService;
+import jakarta.servlet.Servlet;
+import jakarta.servlet.ServletOutputStream;
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.InputStreamResource;
@@ -16,6 +19,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
+import java.awt.*;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.net.URLEncoder;
@@ -70,9 +74,9 @@ public class DocumentController {
         // Kiểm tra loại file
         String fileName = file.getOriginalFilename();
         String fileExtension = Files.getFileExtension(fileName);
-        if (!fileExtension.equalsIgnoreCase("doc") && !fileExtension.equalsIgnoreCase("docx")) {
-            return ResponseEntity.badRequest().body("Only Word documents are allowed.");
-        }
+//        if (!fileExtension.equalsIgnoreCase("doc") && !fileExtension.equalsIgnoreCase("docx")) {
+//            return ResponseEntity.badRequest().body("Only Word documents are allowed.");
+//        }
 
 
         String upload = documentService.store(file);
@@ -103,19 +107,16 @@ public class DocumentController {
     public ResponseEntity<byte[]> getFile(@PathVariable String id) throws IOException {
         Document doc = documentService.getFile(id);
 
-        InputStreamResource resource = new InputStreamResource(new ByteArrayInputStream(doc.getDocData()));
-
         String encodedFileName = URLEncoder.encode(doc.getName(), StandardCharsets.UTF_8.toString());
 
 
         HttpHeaders headers = new HttpHeaders();
         headers.add(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + encodedFileName + "\"");
-        headers.setContentType(MediaType.APPLICATION_PDF);
-        headers.set(HttpHeaders.CONTENT_ENCODING, "UTF-8");
+        headers.setContentType(MediaType.APPLICATION_OCTET_STREAM);
 
         return ResponseEntity.ok()
                 .headers(headers)
-                .body(resource.getContentAsByteArray());
+                .body(doc.getDocData());
     }
 
 //    @ExceptionHandler(StorageFileNotFoundException.class)

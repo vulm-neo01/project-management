@@ -3,6 +3,8 @@ package dev.com.projectmanagement.controller;
 import dev.com.projectmanagement.model.Project;
 import dev.com.projectmanagement.service.ProjectService;
 import lombok.RequiredArgsConstructor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -16,9 +18,12 @@ import java.util.Optional;
 public class ProjectController {
     @Autowired
     private final ProjectService projectService;
+    
+    private static final Logger logger = LoggerFactory.getLogger(ProjectController.class);
 
     @GetMapping
     public ResponseEntity<List<Project>> getAllProject(){
+        logger.info(projectService.findAll().toString());
         return ResponseEntity.ok(projectService.findAll());
     }
 
