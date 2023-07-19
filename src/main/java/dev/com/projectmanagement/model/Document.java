@@ -2,6 +2,7 @@ package dev.com.projectmanagement.model;
 
 import lombok.*;
 import org.springframework.data.annotation.Id;
+import org.springframework.security.core.context.SecurityContextHolder;
 
 import java.time.LocalDate;
 
@@ -24,7 +25,7 @@ public class Document {
         this.name = name;
         this.description = description;
         this.uploadDate = LocalDate.now();
-        this.uploadBy = uploadBy;
+        this.uploadBy = String.valueOf(SecurityContextHolder.getContext().getAuthentication());
         this.type = type;
     }
 

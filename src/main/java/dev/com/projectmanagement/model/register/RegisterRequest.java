@@ -1,26 +1,33 @@
-package dev.com.projectmanagement.dto;
+package dev.com.projectmanagement.model.register;
 
 import jakarta.validation.constraints.NotEmpty;
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 import org.springframework.data.annotation.Id;
-import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.util.List;
 
-@Getter
-@Setter
-@RequiredArgsConstructor
-public class UserDTO {
+@Data
+@AllArgsConstructor
+@NoArgsConstructor
+public class RegisterRequest {
     @Id
     private String userId;
+    @NotEmpty
     private String username;
+    @NotEmpty
+    private String password;
+    @NotEmpty
     private String fullName;
+    @NotEmpty
     private String jobPosition;
+    @NotEmpty
     private String phoneNumber;
+    @NotEmpty
     private String email;
+    @NotEmpty
     private LocalDate birthday;
+    @NotEmpty
     private String address;
-
 }

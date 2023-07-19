@@ -4,6 +4,7 @@ import dev.com.projectmanagement.model.stable.Role;
 import dev.com.projectmanagement.model.stable.Progress;
 import lombok.*;
 import org.springframework.data.annotation.Id;
+import org.springframework.security.core.context.SecurityContextHolder;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -33,7 +34,7 @@ public class Project {
         this.projectName = projectName;
         this.progress = Progress.READY;
         this.createdDate = LocalDate.now();
-        this.createdBy = createdBy;
+        this.createdBy = String.valueOf(SecurityContextHolder.getContext().getAuthentication());
         this.startDate = LocalDate.now();
         this.endDate = LocalDate.now();
     }

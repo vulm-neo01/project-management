@@ -1,10 +1,15 @@
 package dev.com.projectmanagement.config;
 
+import dev.com.projectmanagement.filters.JwtRequestFilter;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
+import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.config.Customizer;
+import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
@@ -21,14 +26,13 @@ import org.springframework.security.web.authentication.logout.LogoutHandler;
 @EnableMethodSecurity
 @RequiredArgsConstructor
 public class SecurityConfig {
-
-//    private final JwtAuthenticationFilter jwtAuthFilter;
-//    private final AuthenticationProvider authenticationProvider;
-//    private final LogoutHandler logoutHandler;
+    @Autowired
+    private JwtRequestFilter jwtRequestFilter;
 
     private static final String[] WHITE_LIST = {
-                        "/api/**",
-                        "/api/auth/**",
+                        "/register",
+                        "/logout",
+                        "/authentication",
                         "/v2/api-docs",
                         "/v3/api-docs",
                         "/v3/api-docs/**",
@@ -43,27 +47,30 @@ public class SecurityConfig {
 
     @Bean
     SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception{
-        return http.sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS).and()
+        return http.csrf().disable()
                 .authorizeHttpRequests()
                 .requestMatchers(WHITE_LIST).permitAll()
-                .anyRequest()
-                .permitAll()
-//                .anyRequest().authenticated()
                 .and()
-//                .sessionManagement()
-//                .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
-//                .and()
-//                .authenticationProvider(authenticationProvider)
-//                .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class)
+                .authorizeHttpRequests()
+                .requestMatchers("/api/**")
+                .authenticated()
+                .and()
+                .sessionManagement()
+                .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
+                .and()
+                .addFilterBefore(jwtRequestFilter, UsernamePasswordAuthenticationFilter.class)
                 .headers(headers -> headers.frameOptions().sameOrigin())
                 .httpBasic(Customizer.withDefaults())
-                .cors().and()
-                .csrf().disable()
                 .build();
     }
 
     @Bean
     public PasswordEncoder passwordEncoder(){
         return new BCryptPasswordEncoder();
+    }
+
+    @Bean
+    public AuthenticationManager authenticationManager(AuthenticationConfiguration configuration) throws Exception{
+        return configuration.getAuthenticationManager();
     }
 }

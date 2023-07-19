@@ -1,7 +1,6 @@
 package dev.com.projectmanagement.service.impl;
 
-import dev.com.projectmanagement.dto.UserDTO;
-import dev.com.projectmanagement.model.login.Login;
+import dev.com.projectmanagement.model.login.LoginRequest;
 import dev.com.projectmanagement.model.User;
 import dev.com.projectmanagement.model.login.LoginMessage;
 import dev.com.projectmanagement.repository.UserRepository;
@@ -16,13 +15,12 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
-import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
-public class UserImpl implements UserService, UserDetailsService {
+public class UserImpl implements UserService{
 
     @Autowired
     private UserRepository userRepository;
@@ -36,37 +34,20 @@ public class UserImpl implements UserService, UserDetailsService {
         return userRepository.findAll();
     }
 
-//    private UserDTO mapToDTO(User user){
-//        UserDTO userDTO = new UserDTO();
-//        userDTO.setUsername(user.getUsername());
-//        userDTO.setUsername(user.getUsername());
-//        userDTO.setPassword(user.getPassword());
-//        userDTO.setFullName(user.getFullName());
-//        userDTO.setJobPosition(user.getJobPosition());
-//        userDTO.setPhoneNumber(user.getPhoneNumber());
-//        userDTO.setEmail(user.getEmail());
-//        userDTO.setBirthday(user.getBirthday());
-//        userDTO.setAddress(user.getAddress());
-//        userDTO.setNoteIds(user.getNoteIds());
-//        userDTO.setProjectIds(user.getProjectIds());
-//        userDTO.setTaskIds(user.getTaskIds());
-//        return userDTO;
-//    }
-
     @Override
     public Optional<User> findById(String id) {
         return userRepository.findById(id);
     }
 
-    @Override
-    public User saveUser(User user) {
-        if(userRepository.findByEmail(user.getEmail()) != null){
-            throw  new RuntimeException("Email existence!");
-        }
-        String encodePassword = passwordEncoder.encode(user.getPassword());
-        user.setPassword(encodePassword);
-        return userRepository.insert(user);
-    }
+//    @Override
+//    public User saveUser(User user) {
+//        if(userRepository.findByEmail(user.getEmail()) != null){
+//            throw  new RuntimeException("Email existence!");
+//        }
+//        String encodePassword = passwordEncoder.encode(user.getPassword());
+//        user.setPassword(encodePassword);
+//        return userRepository.insert(user);
+//    }
 
     @Override
     public User updateUser(User user) {
@@ -115,37 +96,28 @@ public class UserImpl implements UserService, UserDetailsService {
         userRepository.deleteById(id);
     }
 
-    @Override
-    public LoginMessage loginUser(Login login) {
-        String msg = "";
-        Optional<User> loginUser = userRepository.findByEmail(login.getEmail());
-        User user = loginUser.orElseThrow(() -> new UsernameNotFoundException("User not found"));
-        if(user != null){
-            String password = login.getPassword();
-            String encodePassword = user.getPassword();
-            Boolean isRightPassword = passwordEncoder.matches(password, encodePassword);
-            if(isRightPassword){
-                Optional<User> user1 = userRepository.findOneByEmailAndPassword(login.getEmail(), encodePassword);
-                if(user1.isPresent()){
-                    return new LoginMessage("Login success", true);
-                } else {
-                    return new LoginMessage("Login Failed", false);
-                }
-            } else {
-                return new LoginMessage("Password not match", false);
-            }
-        } else {
-            return new LoginMessage("Email not exists!", false);
-        }
-    }
+//    @Override
+//    public LoginMessage loginUser(LoginRequest loginRequest) {
+//        String msg = "";
+//        Optional<User> loginUser = userRepository.findByEmail(loginRequest.getEmail());
+//        User user = loginUser.orElseThrow(() -> new UsernameNotFoundException("User not found"));
+//        if(user != null){
+//            String password = loginRequest.getPassword();
+//            String encodePassword = user.getPassword();
+//            Boolean isRightPassword = passwordEncoder.matches(password, encodePassword);
+//            if(isRightPassword){
+//                Optional<User> user1 = userRepository.findOneByEmailAndPassword(loginRequest.getEmail(), encodePassword);
+//                if(user1.isPresent()){
+//                    return new LoginMessage("Login success", true);
+//                } else {
+//                    return new LoginMessage("Login Failed", false);
+//                }
+//            } else {
+//                return new LoginMessage("Password not match", false);
+//            }
+//        } else {
+//            return new LoginMessage("Email not exists!", false);
+//        }
+//    }
 
-
-    @Override
-    public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-
-        User user = userRepository.findByUsername(username)
-                .orElseThrow(() -> new UsernameNotFoundException("User not found!"));
-
-        return null;
-    }
 }

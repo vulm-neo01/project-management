@@ -1,6 +1,6 @@
 package dev.com.projectmanagement.service;
 
-import dev.com.projectmanagement.model.login.Login;
+import dev.com.projectmanagement.model.login.LoginRequest;
 import dev.com.projectmanagement.model.User;
 import dev.com.projectmanagement.model.login.LoginMessage;
 
@@ -13,7 +13,7 @@ public interface UserService {
 
     Optional<User> findById(String id);
 
-    User saveUser(User user);
+//    User saveUser(User user);
 
     User updateUser(User user);
 
@@ -21,5 +21,5 @@ public interface UserService {
 
     void delete(String id);
 
-    LoginMessage loginUser(Login login);
+//    LoginMessage loginUser(LoginRequest loginRequest);
 }

@@ -2,6 +2,7 @@ package dev.com.projectmanagement.model;
 
 import lombok.*;
 import org.springframework.data.annotation.Id;
+import org.springframework.security.core.context.SecurityContextHolder;
 
 import java.time.LocalDate;
 
@@ -26,7 +27,7 @@ public class Note {
         this.createdDate = LocalDate.now();
         this.modifiedDate = LocalDate.now();
         this.alertTime = alertTime;
-        this.createdBy = createdBy;
+        this.createdBy = String.valueOf(SecurityContextHolder.getContext().getAuthentication());
     }
 
     public Note(String title, LocalDate alertTime) {

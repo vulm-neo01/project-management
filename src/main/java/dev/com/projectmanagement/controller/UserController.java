@@ -1,7 +1,7 @@
 package dev.com.projectmanagement.controller;
 
 import dev.com.projectmanagement.model.User;
-import dev.com.projectmanagement.model.login.Login;
+import dev.com.projectmanagement.model.login.LoginRequest;
 import dev.com.projectmanagement.model.login.LoginMessage;
 import dev.com.projectmanagement.service.UserService;
 import lombok.RequiredArgsConstructor;
@@ -30,11 +30,6 @@ public class UserController {
         return ResponseEntity.ok(userService.findById(userId));
     }
 
-    @PostMapping
-    public ResponseEntity<User> saveAccount(@RequestBody User user){
-        return ResponseEntity.ok(userService.saveUser(user));
-    }
-
     @PostMapping("/update")
     public ResponseEntity<User> updateProfile(@RequestBody User user){
         return ResponseEntity.ok(userService.updateUser(user));
@@ -51,9 +46,4 @@ public class UserController {
         return ResponseEntity.accepted().build();
     }
 
-    @PostMapping("/login")
-    public ResponseEntity<LoginMessage> login(@RequestBody Login login){
-        LoginMessage loginMessage = userService.loginUser(login);
-        return ResponseEntity.ok(loginMessage);
-    }
 }
