@@ -104,11 +104,5 @@
 			</plugin>
 		</plugins>
 	</build>
-	<distributionManagement>
-		<repository>
-			<id>my-project-repository</id>
-			<url>https://project-management/backend/</url>
-		</repository>
-	</distributionManagement>
 
 </project>
