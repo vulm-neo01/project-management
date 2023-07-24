@@ -12,12 +12,14 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 import java.util.Optional;
 
+@CrossOrigin()
 @RestController
 @RequestMapping("/api/projects")
 @RequiredArgsConstructor
 public class ProjectController {
     @Autowired
     private final ProjectService projectService;
+
     
     private static final Logger logger = LoggerFactory.getLogger(ProjectController.class);
 

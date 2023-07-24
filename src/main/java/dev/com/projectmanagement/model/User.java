@@ -10,6 +10,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
@@ -46,6 +47,9 @@ public class User{
         this.address = address;
         this.createdDate = LocalDateTime.now();
         this.role = UserRole.USER;
+        this.projectIds = new ArrayList<>();
+        this.taskIds = new ArrayList<>();
+        this.noteIds = new ArrayList<>();
     }
 
     public User(String password) {
