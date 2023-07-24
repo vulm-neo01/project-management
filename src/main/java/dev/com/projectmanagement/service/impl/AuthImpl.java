@@ -94,6 +94,7 @@ public class AuthImpl implements AuthService {
         project.setUsers((Map.of("64bd556ed926ae5db17f412e", Role.MEMBER)));
         project.setDocIds(Collections.singletonList("64ae76d344d61231a7c82e02"));
         project.setTaskIds(Collections.singletonList(createdTask.getTaskId()));
+        project.setUser(createdUser.getEmail());
 
         Project createdProject = projectRepository.save(project);
 

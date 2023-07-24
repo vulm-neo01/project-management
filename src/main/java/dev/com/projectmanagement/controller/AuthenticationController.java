@@ -26,7 +26,7 @@ import org.springframework.web.bind.annotation.*;
 import java.io.IOException;
 
 @RestController
-@CrossOrigin
+@CrossOrigin(origins = "*", maxAge = 3600)
 public class AuthenticationController {
 
     @Autowired
@@ -61,8 +61,7 @@ public class AuthenticationController {
         }
         final UserDetails userDetails = userDetailsService.loadUserByUsername(loginRequest.getEmail());
         final String jwt = jwtUtils.generateToken(userDetails.getUsername());
-        SecurityContextHolder.getContext();
-        return new AuthenticationResponse(jwt);
+        return new AuthenticationResponse(jwt, userDetails.getUsername());
     }
 
     @PostMapping("/check-email")

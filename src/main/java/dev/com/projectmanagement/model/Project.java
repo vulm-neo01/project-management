@@ -18,6 +18,7 @@ public class Project {
     @Id
     @Generated
     private String projectId;
+    private String user;
     private String description;
     private String projectName;
     private Progress progress;

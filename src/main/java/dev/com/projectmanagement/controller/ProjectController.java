@@ -12,7 +12,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 import java.util.Optional;
 
-@CrossOrigin()
+@CrossOrigin(origins = "*", maxAge = 3600)
 @RestController
 @RequestMapping("/api/projects")
 @RequiredArgsConstructor
@@ -34,6 +34,8 @@ public class ProjectController {
         return ResponseEntity.ok(projectService.findById(projectId));
     }
 
+
+    @CrossOrigin
     @PostMapping
     public ResponseEntity<Project> saveProject(@RequestBody Project project){
         return ResponseEntity.ok(projectService.createNew(project));
