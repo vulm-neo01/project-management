@@ -4,7 +4,7 @@ package dev.com.projectmanagement.config;
 import jakarta.servlet.*;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import org.springframework.beans.factory.annotation.Value;
+import lombok.Value;
 import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
@@ -16,9 +16,6 @@ import java.util.Map;
 @Component
 @Order(Ordered.HIGHEST_PRECEDENCE)
 public class SimpleCorsFilter implements Filter {
-
-    @Value("${app.client.url}")
-    private String clientAppUrl = "";
 
     public SimpleCorsFilter() {
     }
@@ -39,6 +36,7 @@ public class SimpleCorsFilter implements Filter {
         } else {
             chain.doFilter(req, res);
         }
+
     }
 
     @Override

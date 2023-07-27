@@ -50,13 +50,14 @@ public class ProjectImpl implements ProjectService {
             // Đối tượng User tồn tại, bạn có thể lấy ra bằng phương thức get()
             User userUpdated = user.get();
             project.setCreatedBy(userUpdated.getFullName());
-            project.setUser(userUpdated.getEmail());
+//            project.setUser(userUpdated.getEmail());
             project.setCreatedDate(LocalDate.now());
             project.setStartDate(LocalDate.now());
             project.setEndDate(LocalDate.now().plusDays(5));
 
-            Project createdProject = projectRepository.insert(project);
+            Project createdProject = projectRepository.save(project);
             userUpdated.getProjectIds().add(createdProject.getProjectId());
+            repository.save(userUpdated);
             return createdProject;
         } else {
             throw new UsernameNotFoundException("Can find Id by Email!");

@@ -19,8 +19,6 @@ import java.util.Optional;
 public class ProjectController {
     @Autowired
     private final ProjectService projectService;
-
-    
     private static final Logger logger = LoggerFactory.getLogger(ProjectController.class);
 
     @GetMapping
@@ -35,9 +33,10 @@ public class ProjectController {
     }
 
 
-    @CrossOrigin
+
     @PostMapping
-    public ResponseEntity<Project> saveProject(@RequestBody Project project){
+    public ResponseEntity< Project> saveProject(@RequestBody Project project){
+        logger.info("Create project with data: " + project);
         return ResponseEntity.ok(projectService.createNew(project));
     }
 
