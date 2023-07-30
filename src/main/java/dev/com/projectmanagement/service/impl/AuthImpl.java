@@ -77,10 +77,13 @@ public class AuthImpl implements AuthService {
         task.setPriority(Priority.HIGH);
         task.setProgress(Progress.READY);
         task.setCreatedBy(createdUser.getEmail());
+        task.setCreatedId(createdUser.getUserId());
+        task.setCreatedDate(LocalDate.now());
         task.setStartDate(LocalDate.now());
         task.setEndDate(LocalDate.now().plusDays(2));
-        task.setMemberIds(Collections.singletonList("64bd556ed926ae5db17f412e"));
+        task.setMemberIds(Collections.singletonList(createdUser.getUserId()));
         task.setDocIds(Collections.singletonList("64ae76d344d61231a7c82e02"));
+        task.getComments().add("First Comment");
 
         Task createdTask = taskRepository.save(task);
 
@@ -91,20 +94,23 @@ public class AuthImpl implements AuthService {
         project.setCreatedBy(createdUser.getEmail());
         project.setStartDate(LocalDate.now());
         project.setEndDate(LocalDate.now().plusDays(2));
-        project.setUsers((Map.of("64bd556ed926ae5db17f412e", Role.MEMBER)));
+        project.setUsers((Map.of(createdUser.getUserId(), Role.MANAGER)));
         project.setDocIds(Collections.singletonList("64ae76d344d61231a7c82e02"));
         project.setTaskIds(Collections.singletonList(createdTask.getTaskId()));
-        project.setUser(createdUser.getEmail());
 
         Project createdProject = projectRepository.save(project);
+
+        task.setProjectId(createdProject.getProjectId());
+        taskRepository.save(task);
 
         Note note = new Note();
         note.setTitle("Note Title");
         note.setContent("This note is using to remember work!");
         note.setCreatedBy(createdUser.getEmail());
+        note.setUserId(createdUser.getUserId());
         note.setCreatedDate(LocalDate.now());
         note.setModifiedDate(LocalDate.now());
-        note.setAlertTime(LocalDate.now().plusDays(2));
+        note.setAlertTime(LocalDateTime.now().plusDays(2));
 
         Note createdNote = noteRepository.save(note);
 
@@ -122,5 +128,7 @@ public class AuthImpl implements AuthService {
         Optional<User> userEmail = userRepository.findByEmail(email.getEmail());
         return userEmail.isPresent(); // Trả về true nếu email đã tồn tại và false nếu email không tồn tại
     }
+
+    // Thêm hàm check trùng username, để tránh người dùng bị trùng khi muốn thêm vào làm member của project
 
 }

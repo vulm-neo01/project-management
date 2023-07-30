@@ -1,6 +1,10 @@
 package dev.com.projectmanagement.controller;
 
+import dev.com.projectmanagement.model.Document;
 import dev.com.projectmanagement.model.Project;
+import dev.com.projectmanagement.model.User;
+import dev.com.projectmanagement.model.request.MemberToManager;
+import dev.com.projectmanagement.model.stable.Role;
 import dev.com.projectmanagement.service.ProjectService;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
@@ -19,6 +23,7 @@ import java.util.Optional;
 public class ProjectController {
     @Autowired
     private final ProjectService projectService;
+
     private static final Logger logger = LoggerFactory.getLogger(ProjectController.class);
 
     @GetMapping
@@ -45,9 +50,45 @@ public class ProjectController {
         return ResponseEntity.ok(projectService.updateInfo(project));
     }
 
+    @PostMapping("/memberToManager")
+    public ResponseEntity<String> updateProject(@RequestBody MemberToManager request){
+        return ResponseEntity.ok(projectService.changeToManager(request));
+    }
+
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteProject(@PathVariable("id") String projectId){
         projectService.delete(projectId);
         return ResponseEntity.accepted().build();
     }
+
+    @GetMapping("/members/{id}")
+    public ResponseEntity<List<Optional<User>>> getListMember(@PathVariable("id") String projectId){
+        return ResponseEntity.ok(projectService.findMemberById(projectId, Role.MEMBER));
+    }
+
+    @GetMapping("/memberIds/{id}")
+    public ResponseEntity<List<String>> getListMemberId(@PathVariable("id") String projectId){
+        return ResponseEntity.ok(projectService.findListMember(projectId, Role.MEMBER));
+    }
+
+    @GetMapping("/managers/{id}")
+    public ResponseEntity<List<Optional<User>>> getListManager(@PathVariable("id") String projectId){
+        return ResponseEntity.ok(projectService.findMemberById(projectId, Role.MANAGER));
+    }
+
+    @GetMapping("/managerIds/{id}")
+    public ResponseEntity<List<String>> getListManagerId(@PathVariable("id") String projectId){
+        return ResponseEntity.ok(projectService.findListMember(projectId, Role.MANAGER));
+    }
+
+    @GetMapping("/documents/{id}")
+    public ResponseEntity<List<Optional<Document>>> getListDocument(@PathVariable("id") String projectId){
+        return ResponseEntity.ok(projectService.findDocumentById(projectId));
+    }
+
+    @DeleteMapping("/documents/delete/{id}")
+    public void  deleteDocument(@PathVariable("id") String docId){
+        projectService.deleteDocument(docId);
+    }
+
 }

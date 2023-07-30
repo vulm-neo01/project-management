@@ -1,13 +1,19 @@
 package dev.com.projectmanagement.service.impl;
 
+import dev.com.projectmanagement.model.Project;
+import dev.com.projectmanagement.model.Task;
 import dev.com.projectmanagement.model.login.LoginRequest;
 import dev.com.projectmanagement.model.User;
 import dev.com.projectmanagement.model.login.LoginMessage;
+import dev.com.projectmanagement.model.stable.Role;
+import dev.com.projectmanagement.repository.ProjectRepository;
 import dev.com.projectmanagement.repository.UserRepository;
 import dev.com.projectmanagement.service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -16,6 +22,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 @Service
@@ -24,6 +31,9 @@ public class UserImpl implements UserService{
 
     @Autowired
     private UserRepository userRepository;
+
+    @Autowired
+    private ProjectRepository projectRepository;
 
     @Autowired
     private PasswordEncoder passwordEncoder;
@@ -51,40 +61,33 @@ public class UserImpl implements UserService{
 
     @Override
     public User updateUser(User user) {
-        Optional<User> userToChange = userRepository.findByEmail(user.getEmail());
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        UserDetails userDetails = (UserDetails) authentication.getPrincipal();
+        String email = userDetails.getUsername();
+
+        Optional<User> userToChange = userRepository.findByEmail(email);
         User changingUser = userToChange.orElseThrow(() -> new UsernameNotFoundException("User not found"));
-        if(changingUser == null){
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found");
-        }
-        if(user.getFullName() != ""){
-            changingUser.setFullName(user.getFullName());
-        }
-        if(user.getJobPosition() != ""){
-            changingUser.setJobPosition(user.getJobPosition());
-        }
-        if(user.getPhoneNumber() != ""){
-            changingUser.setPhoneNumber(user.getPhoneNumber());
-        }
+
+        changingUser.setFullName(user.getFullName());
+        changingUser.setJobPosition(user.getJobPosition());
+        changingUser.setPhoneNumber(user.getPhoneNumber());
 
         changingUser.setBirthday(user.getBirthday());
-
-        if(user.getAddress() != ""){
-            changingUser.setAddress(user.getAddress());
-        }
+        changingUser.setUsername(user.getUsername());
+        changingUser.setAddress(user.getAddress());
         return userRepository.save(changingUser);
 //        return null;
     }
 
     @Override
-    public User changePassword(User user) {
-        Optional<User> changingUser = userRepository.findByEmail(user.getEmail());
-        User userToChange = changingUser.orElseThrow(() -> new UsernameNotFoundException("User not found"));
-        if(changingUser == null){
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found");
-        }
-        if(user.getPassword() != null){
-            userToChange.setPassword(passwordEncoder.encode(user.getPassword()));
-        }
+    public User changePassword(String password) {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        UserDetails userDetails = (UserDetails) authentication.getPrincipal();
+        String email = userDetails.getUsername();
+
+        Optional<User> user = userRepository.findByEmail(email);
+        User userToChange = user.orElseThrow(() -> new UsernameNotFoundException("User not found"));
+        userToChange.setPassword(passwordEncoder.encode(password));
         return userRepository.save(userToChange);
     }
 
@@ -94,6 +97,12 @@ public class UserImpl implements UserService{
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "ID is not existence!");
         }
         userRepository.deleteById(id);
+    }
+
+    @Override
+    public Optional<User> getUserInfo(String userId) {
+        Optional<User> user = userRepository.findById(userId);
+        return user;
     }
 
 //    @Override

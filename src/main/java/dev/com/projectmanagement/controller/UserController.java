@@ -63,6 +63,11 @@ public class UserController {
         }
     }
 
+    @GetMapping("/{id}")
+    public ResponseEntity<Optional<User>> getAnotherInfo(@PathVariable("id") String userId){
+        return ResponseEntity.ok(userService.getUserInfo(userId));
+    }
+
     @GetMapping("/projects")
     public ResponseEntity<List<Optional<Project>>> getProjects(){
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
@@ -120,8 +125,8 @@ public class UserController {
     }
 
     @PostMapping("/password")
-    public ResponseEntity<User> changePassword(@RequestBody User user){
-        return ResponseEntity.ok(userService.changePassword(user));
+    public ResponseEntity<User> changePassword(@RequestBody String password){
+        return ResponseEntity.ok(userService.changePassword(password));
     }
 
     @DeleteMapping("/{id}")

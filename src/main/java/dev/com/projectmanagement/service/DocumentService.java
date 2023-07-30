@@ -30,7 +30,7 @@ public interface DocumentService {
 //
 //    void delete(String id);
 
-    String store(MultipartFile file) throws IOException;
+    String store(MultipartFile file, String projectId) throws IOException;
 
 
     byte[] downloadFile(String id);

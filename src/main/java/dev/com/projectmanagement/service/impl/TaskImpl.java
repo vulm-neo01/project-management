@@ -1,18 +1,28 @@
 package dev.com.projectmanagement.service.impl;
 
+import dev.com.projectmanagement.model.Project;
 import dev.com.projectmanagement.model.Task;
+import dev.com.projectmanagement.model.User;
+import dev.com.projectmanagement.model.stable.Role;
+import dev.com.projectmanagement.repository.ProjectRepository;
 import dev.com.projectmanagement.repository.TaskRepository;
 import dev.com.projectmanagement.repository.UserRepository;
 import dev.com.projectmanagement.service.TaskService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.time.LocalDate;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 @Service
@@ -22,7 +32,10 @@ public class TaskImpl implements TaskService {
     private final TaskRepository taskRepository;
 
     @Autowired
-    private final UserRepository userRepository;
+    private final UserRepository repository;
+
+    @Autowired
+    private final ProjectRepository projectRepository;
 
     @Override
     public List<Task> findAll(){
@@ -35,11 +48,37 @@ public class TaskImpl implements TaskService {
     }
 
     @Override
+    public List<Optional<Task>> findListById(String projectId) {
+        Optional<Project> project = projectRepository.findById(projectId);
+        Project updatedProject = project.orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Project not found!"));
+        List<String> taskIds = updatedProject.getTaskIds();
+        List<Optional<Task>> tasks = taskRepository.findByTaskIdIn(taskIds);
+        return tasks;
+    }
+
+    @Override
     public Task createNew(Task task){
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        String currentUserId = authentication.getName();
-        task.setCreatedBy(currentUserId);
-        return taskRepository.insert(task);
+        UserDetails userDetails = (UserDetails) authentication.getPrincipal();
+        String email = userDetails.getUsername();
+        Optional<Project> project = projectRepository.findById(task.getProjectId());
+        Project updatedProject = project.orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Project not found!"));
+        Optional<User> user = repository.findByEmail(email);
+        if (user.isPresent()) {
+            // Đối tượng User tồn tại, bạn có thể lấy ra bằng phương thức get()
+            User userUpdated = user.get();
+            task.setCreatedDate(LocalDate.now());
+
+
+            Task createdTask = taskRepository.save(task);
+            updatedProject.getTaskIds().add(createdTask.getTaskId());
+            projectRepository.save(updatedProject);
+            userUpdated.getTaskIds().add(createdTask.getTaskId());
+            repository.save(userUpdated);
+            return createdTask;
+        } else {
+            throw new UsernameNotFoundException("Can find Id by Email!");
+        }
     }
 
     @Override
@@ -64,5 +103,15 @@ public class TaskImpl implements TaskService {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "ID is not existence!");
         }
         taskRepository.deleteById(id);
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        UserDetails userDetails = (UserDetails) authentication.getPrincipal();
+        String email = userDetails.getUsername();
+
+        Optional<User> user = repository.findByEmail(email);
+        if(user.isPresent()){
+            User userUpdated = user.get();
+            userUpdated.getTaskIds().remove(id);
+            repository.save(userUpdated);
+        }
     }
 }

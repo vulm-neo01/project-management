@@ -30,12 +30,12 @@ public class DocumentController {
     private final DocumentService documentService;
 
     @PostMapping
-    public ResponseEntity<String> handleFileUpload(@RequestParam("file") MultipartFile file) throws IOException {
+    public ResponseEntity<String> handleFileUpload(@RequestParam("file") MultipartFile file,@RequestParam("projectId") String projectId) throws IOException {
         // Kiểm tra loại file
         String fileName = file.getOriginalFilename();
         String fileExtension = Files.getFileExtension(fileName);
 
-        String upload = documentService.store(file);
+        String upload = documentService.store(file, projectId);
         return ResponseEntity.status(HttpStatus.OK).body(upload);
     }
 

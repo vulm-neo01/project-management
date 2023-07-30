@@ -17,9 +17,12 @@ public interface UserService {
 
     User updateUser(User user);
 
-    User changePassword(User user);
+    User changePassword(String password);
 
     void delete(String id);
+
+    Optional<User> getUserInfo(String userId);
+
 
 //    LoginMessage loginUser(LoginRequest loginRequest);
 }

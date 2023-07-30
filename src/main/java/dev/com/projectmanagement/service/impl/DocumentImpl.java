@@ -1,12 +1,16 @@
 package dev.com.projectmanagement.service.impl;
 
 import dev.com.projectmanagement.model.Document;
+import dev.com.projectmanagement.model.Project;
 import dev.com.projectmanagement.repository.DocumentRepository;
+import dev.com.projectmanagement.repository.ProjectRepository;
 import dev.com.projectmanagement.service.DocumentService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.io.IOException;
 import java.time.LocalDate;
@@ -19,16 +23,26 @@ public class DocumentImpl implements DocumentService {
     @Autowired
     DocumentRepository documentRepository;
 
+    @Autowired
+    ProjectRepository projectRepository;
+
     @Override
-    public String store(MultipartFile file) throws IOException {
+    public String store(MultipartFile file, String projectId) throws IOException {
         Document document = documentRepository.save(Document.builder()
                         .name(file.getOriginalFilename())
+                        .rootId(projectId) // Cần sửa lại, test tạm thời
                         .description("")
                         .docData(file.getBytes())
                         .type(file.getContentType())
-                        .uploadBy(String.valueOf(SecurityContextHolder.getContext().getAuthentication()))
+                        .uploadBy(String.valueOf(SecurityContextHolder.getContext().getAuthentication().getPrincipal()))
                         .uploadDate(LocalDate.now())
                 .build());
+
+        Optional<Project> changingProject = projectRepository.findById(projectId);
+        Project projectToUpdate = changingProject.orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Project not found"));
+        projectToUpdate.getDocIds().add(document.getDocId());
+        projectRepository.save(projectToUpdate);
+
         if(document != null){
             return "file upload successfully: " + file.getOriginalFilename();
         }
@@ -51,7 +65,7 @@ public class DocumentImpl implements DocumentService {
     @Override
     public Stream<Document> getAllFiles(){
         return documentRepository.findAll().stream();
-    };
+    }
 
 
 //    @Override

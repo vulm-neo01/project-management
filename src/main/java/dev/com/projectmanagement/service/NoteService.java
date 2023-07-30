@@ -18,7 +18,7 @@ public interface NoteService {
 
     Optional<Note> findById(String id);
 
-    String insertNote(Note note);
+    Note insertNote(Note note);
 
     String updateSetting(Note note);
 

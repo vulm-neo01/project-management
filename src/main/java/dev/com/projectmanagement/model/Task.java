@@ -23,14 +23,19 @@ public class Task {
     private Progress progress;
     private LocalDate createdDate;
     private String createdBy;
+    private String createdId;
+    private String projectId;
     private LocalDate startDate;
     private LocalDate endDate;
     private List<String> memberIds;
     private List<String> docIds;
+    private List<String> comments;
 
-    public Task(String description, String taskName, Priority priority, String createdBy) {
+    public Task(String description, String taskName, Priority priority, String createdId, String projectId) {
         this.description = description;
         this.taskName = taskName;
+        this.createdId = createdId;
+        this.projectId = projectId;
         this.priority = priority;
         this.progress = Progress.READY;
         this.createdDate = LocalDate.now();
@@ -46,5 +51,9 @@ public class Task {
         this.progress = progress;
         this.startDate = startDate;
         this.endDate = endDate;
+    }
+
+    public Task(List<String> comments){
+        this.comments = comments;
     }
 }

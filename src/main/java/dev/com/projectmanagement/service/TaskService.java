@@ -11,6 +11,8 @@ public interface TaskService {
 
     Optional<Task> findById(String id);
 
+    List<Optional<Task>> findListById(String projectId);
+
     Task createNew(Task task);
 
     Task updateInfo(Task task);

@@ -1,7 +1,15 @@
 package dev.com.projectmanagement.service.impl;
 
+import dev.com.projectmanagement.model.Document;
+import dev.com.projectmanagement.model.Notification;
 import dev.com.projectmanagement.model.Project;
 import dev.com.projectmanagement.model.User;
+import dev.com.projectmanagement.model.request.MemberToManager;
+import dev.com.projectmanagement.model.stable.NotiState;
+import dev.com.projectmanagement.model.stable.NotificationType;
+import dev.com.projectmanagement.model.stable.Role;
+import dev.com.projectmanagement.repository.DocumentRepository;
+import dev.com.projectmanagement.repository.NotificationRepository;
 import dev.com.projectmanagement.repository.ProjectRepository;
 import dev.com.projectmanagement.repository.UserRepository;
 import dev.com.projectmanagement.service.ProjectService;
@@ -17,8 +25,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.time.LocalDate;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
 @Service
 @RequiredArgsConstructor
@@ -28,6 +35,12 @@ public class ProjectImpl implements ProjectService {
 
     @Autowired
     private final UserRepository repository;
+
+    @Autowired
+    private final DocumentRepository documentRepository;
+
+    @Autowired
+    private final NotificationRepository notificationRepository;
 
     @Override
     public List<Project> findAll(){
@@ -49,11 +62,10 @@ public class ProjectImpl implements ProjectService {
         if (user.isPresent()) {
             // Đối tượng User tồn tại, bạn có thể lấy ra bằng phương thức get()
             User userUpdated = user.get();
-            project.setCreatedBy(userUpdated.getFullName());
-//            project.setUser(userUpdated.getEmail());
+            project.setCreatedBy(email);
+            Map<String, Role> users = new HashMap<>();
+            users.put(userUpdated.getUserId(), Role.MANAGER);
             project.setCreatedDate(LocalDate.now());
-            project.setStartDate(LocalDate.now());
-            project.setEndDate(LocalDate.now().plusDays(5));
 
             Project createdProject = projectRepository.save(project);
             userUpdated.getProjectIds().add(createdProject.getProjectId());
@@ -84,5 +96,108 @@ public class ProjectImpl implements ProjectService {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "ID is not existence!");
         }
         projectRepository.deleteById(id);
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        UserDetails userDetails = (UserDetails) authentication.getPrincipal();
+        String email = userDetails.getUsername();
+
+        Optional<User> user = repository.findByEmail(email);
+        if(user.isPresent()){
+            User userUpdated = user.get();
+            userUpdated.getProjectIds().remove(id);
+            repository.save(userUpdated);
+        }
+    }
+
+    @Override
+    public List<Optional<User>> findMemberById(String projectId, Role role) {
+        Optional<Project> project = projectRepository.findById(projectId);
+        Project updatedProject = project.orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Project not found!"));
+        Map<String, Role> userList = updatedProject.getUsers();
+        List<String> userIds = new ArrayList<>();
+
+        for (Map.Entry<String, Role> entry : userList.entrySet()) {
+            String userId = entry.getKey();
+            Role userRole = entry.getValue();
+
+            if (userRole == role) {
+                userIds.add(userId);
+            }
+        }
+        List<Optional<User>> users = repository.findByUserIdIn(userIds);
+        return users;
+    }
+
+    @Override
+    public List<String> findListMember(String projectId, Role role) {
+        Optional<Project> project = projectRepository.findById(projectId);
+        Project updatedProject = project.orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Project not found!"));
+        Map<String, Role> userList = updatedProject.getUsers();
+        List<String> userIds = new ArrayList<>();
+
+        for (Map.Entry<String, Role> entry : userList.entrySet()) {
+            String userId = entry.getKey();
+            Role userRole = entry.getValue();
+
+            if (userRole == role) {
+                userIds.add(userId);
+            }
+        }
+        return userIds;
+    }
+
+    @Override
+    public List<Optional<Document>> findDocumentById(String projectId) {
+        Optional<Project> project = projectRepository.findById(projectId);
+        Project updatedProject = project.orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Project not found!"));
+
+        List<String> docIds = updatedProject.getDocIds();
+
+        List<Optional<Document>> docs = documentRepository.findByDocIdIn(docIds);
+        return docs;
+    }
+
+    @Override
+    public void deleteDocument(String docId) {
+        Document document = documentRepository.findByDocId(docId);
+        Optional<Project> project = projectRepository.findById(document.getRootId());
+        Project updatedProject = project.orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Project not found!"));
+
+        updatedProject.getDocIds().remove(docId);
+        projectRepository.save(updatedProject);
+        documentRepository.deleteById(docId);
+    }
+
+    @Override
+    public String changeToManager(MemberToManager request) {
+        String projectId = request.getProjectId();
+        String userId = request.getUserId();
+
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        UserDetails userDetails = (UserDetails) authentication.getPrincipal();
+        String email = userDetails.getUsername();
+
+        Optional<Project> project = projectRepository.findById(projectId);
+        Project updatedProject = project.orElseThrow(() -> new RuntimeException("Can't find project by id!"));
+        Optional<User> user = repository.findById(userId);
+
+        Role currentRole = updatedProject.getUsers().get(userId);
+        if(currentRole != null && currentRole == Role.MEMBER){
+            updatedProject.getUsers().put(userId, Role.MANAGER);
+        } else {
+            throw new RuntimeException("User not have any role to change.");
+        }
+
+        projectRepository.save(updatedProject);
+
+        Notification notification = new Notification();
+        notification.setState(NotiState.UNREAD);
+        notification.setProjectId(projectId);
+        notification.setInviterName(email);
+        notification.setRole(Role.MANAGER);
+        notification.setType(NotificationType.NOTIFY);
+        notification.setEmail(user.get().getEmail());
+        notificationRepository.save(notification);
+
+        return "Change to Manager successfully!";
     }
 }

@@ -56,11 +56,11 @@ public class User{
         this.password = password;
     }
 
-    public User(String fullName, String jobPosition, String phoneNumber, String email, LocalDate birthday, String address) {
+    public User(String fullName, String jobPosition, String phoneNumber, String username, LocalDate birthday, String address) {
         this.fullName = fullName;
         this.jobPosition = jobPosition;
         this.phoneNumber = phoneNumber;
-        this.email = email;
+        this.username = username;
         this.birthday = birthday;
         this.address = address;
     }
