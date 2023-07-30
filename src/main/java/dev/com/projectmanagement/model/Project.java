@@ -7,6 +7,7 @@ import org.springframework.data.annotation.Id;
 import org.springframework.security.core.context.SecurityContextHolder;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -45,5 +46,19 @@ public class Project {
         this.progress = progress;
         this.startDate = startDate;
         this.endDate = endDate;
+    }
+
+    public List<String> getTaskIds() {
+        if (this.taskIds == null) {
+            this.taskIds = new ArrayList<>();
+        }
+        return this.taskIds;
+    }
+
+    public List<String> getDocIds() {
+        if (this.docIds == null) {
+            this.docIds = new ArrayList<>();
+        }
+        return this.docIds;
     }
 }

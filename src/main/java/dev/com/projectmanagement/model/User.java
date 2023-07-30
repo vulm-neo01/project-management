@@ -65,4 +65,25 @@ public class User{
         this.address = address;
     }
 
+    public List<String> getTaskIds() {
+        if (this.taskIds == null) {
+            this.taskIds = new ArrayList<>();
+        }
+        return this.taskIds;
+    }
+
+    public List<String> getProjectIds() {
+        if (this.projectIds == null) {
+            this.projectIds = new ArrayList<>();
+        }
+        return this.projectIds;
+    }
+
+    public List<String> getNoteIds() {
+        if (this.noteIds == null) {
+            this.noteIds = new ArrayList<>();
+        }
+        return this.noteIds;
+    }
+
 }

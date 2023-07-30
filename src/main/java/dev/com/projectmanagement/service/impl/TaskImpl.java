@@ -64,21 +64,14 @@ public class TaskImpl implements TaskService {
         Optional<Project> project = projectRepository.findById(task.getProjectId());
         Project updatedProject = project.orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Project not found!"));
         Optional<User> user = repository.findByEmail(email);
-        if (user.isPresent()) {
-            // Đối tượng User tồn tại, bạn có thể lấy ra bằng phương thức get()
-            User userUpdated = user.get();
-            task.setCreatedDate(LocalDate.now());
+        User updatedUser = user.orElseThrow(() -> new UsernameNotFoundException("Not found user created task!"));
 
+        task.setCreatedDate(LocalDate.now());
+        Task createdTask = taskRepository.save(task);
 
-            Task createdTask = taskRepository.save(task);
-            updatedProject.getTaskIds().add(createdTask.getTaskId());
-            projectRepository.save(updatedProject);
-            userUpdated.getTaskIds().add(createdTask.getTaskId());
-            repository.save(userUpdated);
-            return createdTask;
-        } else {
-            throw new UsernameNotFoundException("Can find Id by Email!");
-        }
+        updatedProject.getTaskIds().add(createdTask.getTaskId());
+        projectRepository.save(updatedProject);
+        return createdTask;
     }
 
     @Override

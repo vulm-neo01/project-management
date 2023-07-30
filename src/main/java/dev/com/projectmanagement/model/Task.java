@@ -7,6 +7,7 @@ import org.springframework.data.annotation.Id;
 import org.springframework.security.core.context.SecurityContextHolder;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 
 @Data
@@ -55,5 +56,26 @@ public class Task {
 
     public Task(List<String> comments){
         this.comments = comments;
+    }
+
+    public List<String> getMemberIds() {
+        if (this.memberIds == null) {
+            this.memberIds = new ArrayList<>();
+        }
+        return this.memberIds;
+    }
+
+    public List<String> getDocIds() {
+        if (this.docIds == null) {
+            this.docIds = new ArrayList<>();
+        }
+        return this.docIds;
+    }
+
+    public List<String> getComments() {
+        if (this.comments == null) {
+            this.comments = new ArrayList<>();
+        }
+        return this.comments;
     }
 }

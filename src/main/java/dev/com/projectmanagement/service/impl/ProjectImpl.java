@@ -66,6 +66,7 @@ public class ProjectImpl implements ProjectService {
             Map<String, Role> users = new HashMap<>();
             users.put(userUpdated.getUserId(), Role.MANAGER);
             project.setCreatedDate(LocalDate.now());
+            project.setUsers(users);
 
             Project createdProject = projectRepository.save(project);
             userUpdated.getProjectIds().add(createdProject.getProjectId());
