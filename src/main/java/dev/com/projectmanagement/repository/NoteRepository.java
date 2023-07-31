@@ -12,4 +12,6 @@ import java.util.Optional;
 @Repository
 public interface NoteRepository extends MongoRepository<Note, String> {
     List<Optional<Note>> findByNoteIdIn(List<String> noteIds);
+
+    List<Note> findAllByCreatedBy(String createdBy);
 }

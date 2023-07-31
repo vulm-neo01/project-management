@@ -21,6 +21,7 @@ public class Note {
     private LocalDate createdDate;
     private LocalDate modifiedDate;
     private LocalDateTime alertTime;
+    private Boolean isAlert;
     private String createdBy;
     private Project project;
     private Task task;

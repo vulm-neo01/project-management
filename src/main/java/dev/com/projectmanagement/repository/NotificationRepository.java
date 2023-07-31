@@ -11,4 +11,6 @@ import java.util.Optional;
 public interface NotificationRepository extends MongoRepository<Notification, String> {
 
     List<Optional<Notification>> findAllByEmail(String email);
+
+    Optional<Notification> findByNoteId(String noteId);
 }

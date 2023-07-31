@@ -1,15 +1,11 @@
 package dev.com.projectmanagement.service.impl;
 
-import dev.com.projectmanagement.model.Note;
-import dev.com.projectmanagement.model.Project;
-import dev.com.projectmanagement.model.Task;
-import dev.com.projectmanagement.model.User;
+import dev.com.projectmanagement.model.*;
 import dev.com.projectmanagement.model.request.NoteContentRequest;
 import dev.com.projectmanagement.model.request.NoteInfoRequest;
-import dev.com.projectmanagement.repository.NoteRepository;
-import dev.com.projectmanagement.repository.ProjectRepository;
-import dev.com.projectmanagement.repository.TaskRepository;
-import dev.com.projectmanagement.repository.UserRepository;
+import dev.com.projectmanagement.model.stable.NotiState;
+import dev.com.projectmanagement.model.stable.NotificationType;
+import dev.com.projectmanagement.repository.*;
 import dev.com.projectmanagement.service.NoteService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,6 +19,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -40,6 +37,9 @@ public class NoteImpl implements NoteService {
 
     @Autowired
     private final TaskRepository taskRepository;
+
+    @Autowired
+    private final NotificationRepository notificationRepository;
 
     @Override
     public List<Note> findAll(){
@@ -64,7 +64,7 @@ public class NoteImpl implements NoteService {
             note.setCreatedDate(LocalDate.now());
             note.setModifiedDate(LocalDate.now());
             note.setUserId(userUpdated.getUserId());
-
+            note.setIsAlert(false);
             Note createdNote = noteRepository.save(note);
             userUpdated.getNoteIds().add(createdNote.getNoteId());
             repository.save(userUpdated);
@@ -93,6 +93,7 @@ public class NoteImpl implements NoteService {
         noteUpdated.setTitle(request.getTitle());
         noteUpdated.setAlertTime(request.getAlertTime());
         noteUpdated.setModifiedDate(LocalDate.now());
+        noteUpdated.setIsAlert(false);
 
         return Optional.of(noteRepository.save(noteUpdated));
     }
@@ -124,5 +125,34 @@ public class NoteImpl implements NoteService {
             userUpdated.getNoteIds().remove(id);
             repository.save(userUpdated);
         }
+    }
+
+    @Override
+    public Optional<Note> alertNote() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        UserDetails userDetails = (UserDetails) authentication.getPrincipal();
+        String email = userDetails.getUsername();
+        List<Note> noteList = noteRepository.findAllByCreatedBy(email);
+        LocalDateTime currentDateTime = LocalDateTime.now();
+
+        Optional<Note> matchedNote = noteList.stream()
+                .filter(note -> note.getAlertTime().isBefore(currentDateTime))
+                .filter(note -> note.getIsAlert().equals(false))
+                .findFirst();
+
+        if (matchedNote.isPresent()) {
+                Notification notification = new Notification();
+                notification.setNoteId(matchedNote.get().getNoteId());
+                notification.setType(NotificationType.NOTE);
+                notification.setEmail(email);
+                notification.setState(NotiState.UNREAD);
+                matchedNote.get().setIsAlert(true);
+                noteRepository.save(matchedNote.get());
+                notificationRepository.save(notification);
+        } else {
+            return Optional.empty();
+        }
+
+        return matchedNote;
     }
 }

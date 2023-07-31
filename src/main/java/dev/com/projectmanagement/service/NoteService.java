@@ -27,4 +27,6 @@ public interface NoteService {
     Optional<Note> updateContent(NoteContentRequest request);
 
     void delete(String id);
+
+    Optional<Note> alertNote();
 }

@@ -29,6 +29,11 @@ public class NoteController {
         return ResponseEntity.ok(noteService.findById(noteId));
     }
 
+    @GetMapping("/alert")
+    public ResponseEntity<Optional<Note>> getNote(){
+        return ResponseEntity.ok(noteService.alertNote());
+    }
+
     @PostMapping
     public ResponseEntity<Note> saveNote(@RequestBody Note note){
         return ResponseEntity.ok(noteService.insertNote(note));
