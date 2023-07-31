@@ -1,12 +1,11 @@
 package dev.com.projectmanagement.service.impl;
 
-import dev.com.projectmanagement.model.Project;
-import dev.com.projectmanagement.model.Task;
-import dev.com.projectmanagement.model.User;
+import dev.com.projectmanagement.model.*;
+import dev.com.projectmanagement.model.request.TaskRequest;
+import dev.com.projectmanagement.model.stable.NotiState;
+import dev.com.projectmanagement.model.stable.NotificationType;
 import dev.com.projectmanagement.model.stable.Role;
-import dev.com.projectmanagement.repository.ProjectRepository;
-import dev.com.projectmanagement.repository.TaskRepository;
-import dev.com.projectmanagement.repository.UserRepository;
+import dev.com.projectmanagement.repository.*;
 import dev.com.projectmanagement.service.TaskService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,10 +19,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.time.LocalDate;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 
 @Service
 @RequiredArgsConstructor
@@ -36,6 +32,12 @@ public class TaskImpl implements TaskService {
 
     @Autowired
     private final ProjectRepository projectRepository;
+
+    @Autowired
+    private final DocumentRepository documentRepository;
+
+    @Autowired
+    private final NotificationRepository notificationRepository;
 
     @Override
     public List<Task> findAll(){
@@ -106,5 +108,101 @@ public class TaskImpl implements TaskService {
             userUpdated.getTaskIds().remove(id);
             repository.save(userUpdated);
         }
+    }
+
+    @Override
+    public List<Optional<User>> findMemberById(String taskId) {
+        Optional<Task> task = taskRepository.findById(taskId);
+        Task updatedTask = task.orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Task not found!"));
+
+        List<String> memberIds = updatedTask.getMemberIds();
+
+
+        List<Optional<User>> users = repository.findByUserIdIn(memberIds);
+        return users;
+    }
+
+    @Override
+    public List<Optional<Document>> findDocumentById(String taskId) {
+        Optional<Task> task = taskRepository.findById(taskId);
+        Task updatedTask = task.orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Task not found!"));
+
+        List<String> docIds = updatedTask.getDocIds();
+
+        List<Optional<Document>> docs = documentRepository.findByDocIdIn(docIds);
+        return docs;
+    }
+
+    @Override
+    public void deleteDocument(String docId) {
+        Document document = documentRepository.findByDocId(docId);
+        Optional<Task> task = taskRepository.findById(document.getRootId());
+        Task updatedTask = task.orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Task not found!"));
+
+        updatedTask.getDocIds().remove(docId);
+        taskRepository.save(updatedTask);
+        documentRepository.deleteById(docId);
+    }
+
+    @Override
+    public String removeFromTask(TaskRequest request) {
+        String taskId = request.getTaskId();
+        String userId = request.getUserId();
+
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        UserDetails userDetails = (UserDetails) authentication.getPrincipal();
+        String email = userDetails.getUsername();
+
+        Optional<Task> task = taskRepository.findById(taskId);
+        Task updatedTask = task.orElseThrow(() -> new RuntimeException("Can't find task by id!"));
+        Optional<User> user = repository.findById(userId);
+        User updatedUser = user.orElseThrow(() -> new RuntimeException("Can't find user by id!"));
+
+        updatedTask.getMemberIds().remove(userId);
+        updatedUser.getTaskIds().remove(taskId);
+
+        taskRepository.save(updatedTask);
+        repository.save(updatedUser);
+
+        Notification notification = new Notification();
+        notification.setState(NotiState.UNREAD);
+        notification.setTaskId(taskId);
+        notification.setInviterName(email);
+        notification.setType(NotificationType.NOTIFY);
+        notification.setEmail(user.get().getEmail());
+        notificationRepository.save(notification);
+
+        return "Remove from task successfully!";
+    }
+
+    @Override
+    public String addToTask(TaskRequest request) {
+        String taskId = request.getTaskId();
+        String userId = request.getUserId();
+
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        UserDetails userDetails = (UserDetails) authentication.getPrincipal();
+        String email = userDetails.getUsername();
+
+        Optional<Task> task = taskRepository.findById(taskId);
+        Task updatedTask = task.orElseThrow(() -> new RuntimeException("Can't find task by id!"));
+        Optional<User> user = repository.findById(userId);
+        User updatedUser = user.orElseThrow(() -> new RuntimeException("Can't find user by id!"));
+
+        updatedTask.getMemberIds().add(userId);
+        updatedUser.getTaskIds().add(taskId);
+
+        taskRepository.save(updatedTask);
+        repository.save(updatedUser);
+
+        Notification notification = new Notification();
+        notification.setState(NotiState.UNREAD);
+        notification.setTaskId(taskId);
+        notification.setInviterName(email);
+        notification.setType(NotificationType.NOTIFY);
+        notification.setEmail(user.get().getEmail());
+        notificationRepository.save(notification);
+
+        return "Add to task successfully!";
     }
 }

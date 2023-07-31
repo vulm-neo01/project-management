@@ -29,13 +29,23 @@ public class DocumentController {
     @Autowired
     private final DocumentService documentService;
 
-    @PostMapping
+    @PostMapping("/project")
     public ResponseEntity<String> handleFileUpload(@RequestParam("file") MultipartFile file,@RequestParam("projectId") String projectId) throws IOException {
         // Kiểm tra loại file
         String fileName = file.getOriginalFilename();
         String fileExtension = Files.getFileExtension(fileName);
 
-        String upload = documentService.store(file, projectId);
+        String upload = documentService.storeToProject(file, projectId);
+        return ResponseEntity.status(HttpStatus.OK).body(upload);
+    }
+
+    @PostMapping("/task")
+    public ResponseEntity<String> handleFileUploadTask(@RequestParam("file") MultipartFile file,@RequestParam("taskId") String taskId) throws IOException {
+        // Kiểm tra loại file
+        String fileName = file.getOriginalFilename();
+        String fileExtension = Files.getFileExtension(fileName);
+
+        String upload = documentService.storeToTask(file, taskId);
         return ResponseEntity.status(HttpStatus.OK).body(upload);
     }
 

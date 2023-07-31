@@ -1,6 +1,8 @@
 package dev.com.projectmanagement.controller;
 
 import dev.com.projectmanagement.model.Note;
+import dev.com.projectmanagement.model.request.NoteContentRequest;
+import dev.com.projectmanagement.model.request.NoteInfoRequest;
 import dev.com.projectmanagement.service.NoteService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -33,13 +35,13 @@ public class NoteController {
     }
 
     @PostMapping("/updateSetting")
-    public ResponseEntity<String> changingSetting(@RequestBody Note note){
-        return ResponseEntity.ok(noteService.updateSetting(note));
+    public ResponseEntity<Optional<Note>> changingSetting(@RequestBody NoteInfoRequest request){
+        return ResponseEntity.ok(noteService.updateSetting(request));
     }
 
     @PostMapping("/updateContent")
-    public ResponseEntity<String> changingContent(@RequestBody Note note){
-        return ResponseEntity.ok(noteService.updateContent(note));
+    public ResponseEntity<Optional<Note>> changingContent(@RequestBody NoteContentRequest request){
+        return ResponseEntity.ok(noteService.updateContent(request));
     }
 
     @DeleteMapping("/{id}")

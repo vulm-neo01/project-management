@@ -22,6 +22,8 @@ public class Note {
     private LocalDate modifiedDate;
     private LocalDateTime alertTime;
     private String createdBy;
+    private Project project;
+    private Task task;
 
     public Note(String title, String content, LocalDateTime alertTime, String createdBy) {
         this.title = title;
@@ -41,5 +43,17 @@ public class Note {
     public Note(String content) {
         this.content = content;
         this.modifiedDate = LocalDate.now();
+    }
+
+    public Note(String noteId, String content) {
+        this.noteId = noteId;
+        this.content = content;
+    }
+
+    public Note(String title, LocalDateTime alertTime, Project project, Task task) {
+        this.title = title;
+        this.alertTime = alertTime;
+        this.project = project;
+        this.task = task;
     }
 }

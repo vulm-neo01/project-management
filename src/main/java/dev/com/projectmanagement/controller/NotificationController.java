@@ -2,6 +2,7 @@ package dev.com.projectmanagement.controller;
 
 import dev.com.projectmanagement.model.Notification;
 import dev.com.projectmanagement.model.request.NotificationRequest;
+import dev.com.projectmanagement.model.request.TaskRequest;
 import dev.com.projectmanagement.model.stable.NotiState;
 import dev.com.projectmanagement.service.NotifyService;
 import lombok.RequiredArgsConstructor;
@@ -29,8 +30,13 @@ public class NotificationController {
         return ResponseEntity.ok(notifyService.getAllUnread());
     }
 
+    @PostMapping("/replyProject")
+    public ResponseEntity<Optional<NotiState>> replyInviteProject(@RequestBody NotificationRequest request){
+        return ResponseEntity.ok(notifyService.receiveInviteProject(request));
+    }
+
     @PostMapping("/reply")
-    public ResponseEntity<Optional<NotiState>> replyInvite(@RequestBody NotificationRequest request){
-        return ResponseEntity.ok(notifyService.receiveInvite(request));
+    public ResponseEntity<Optional<Notification>> replyInviteTask(@RequestBody NotificationRequest request){
+        return ResponseEntity.ok(notifyService.receiveInviteTask(request));
     }
 }

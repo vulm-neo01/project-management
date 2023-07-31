@@ -1,8 +1,14 @@
 package dev.com.projectmanagement.service.impl;
 
 import dev.com.projectmanagement.model.Note;
+import dev.com.projectmanagement.model.Project;
+import dev.com.projectmanagement.model.Task;
 import dev.com.projectmanagement.model.User;
+import dev.com.projectmanagement.model.request.NoteContentRequest;
+import dev.com.projectmanagement.model.request.NoteInfoRequest;
 import dev.com.projectmanagement.repository.NoteRepository;
+import dev.com.projectmanagement.repository.ProjectRepository;
+import dev.com.projectmanagement.repository.TaskRepository;
 import dev.com.projectmanagement.repository.UserRepository;
 import dev.com.projectmanagement.service.NoteService;
 import lombok.RequiredArgsConstructor;
@@ -28,6 +34,12 @@ public class NoteImpl implements NoteService {
 
     @Autowired
     private final UserRepository repository;
+
+    @Autowired
+    private final ProjectRepository projectRepository;
+
+    @Autowired
+    private final TaskRepository taskRepository;
 
     @Override
     public List<Note> findAll(){
@@ -63,24 +75,37 @@ public class NoteImpl implements NoteService {
     }
 
     @Override
-    public String updateSetting(Note note) {
-        Optional<Note> changingNote = noteRepository.findById(note.getNoteId());
+    public Optional<Note> updateSetting(NoteInfoRequest request) {
+        Optional<Note> changingNote = noteRepository.findById(request.getNoteId());
         Note noteUpdated = changingNote.orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Note not found"));
+        if(request.getProjectId() != null){
+            Optional<Project> project = projectRepository.findById(request.getProjectId());
+            noteUpdated.setProject(project.get());
+        } else {
+            noteUpdated.setProject(null);
+        }
+        if(request.getTaskId() != null){
+            Optional<Task> task = taskRepository.findById(request.getTaskId());
+            noteUpdated.setTask(task.get());
+        } else {
+            noteUpdated.setTask(null);
+        }
+        noteUpdated.setTitle(request.getTitle());
+        noteUpdated.setAlertTime(request.getAlertTime());
+        noteUpdated.setModifiedDate(LocalDate.now());
 
-        noteUpdated.setTitle(note.getTitle());
-        noteUpdated.setAlertTime(note.getAlertTime());
-
-        return noteRepository.save(noteUpdated).toString();
+        return Optional.of(noteRepository.save(noteUpdated));
     }
 
     @Override
-    public String updateContent(Note note) {
-        Optional<Note> changingNote = noteRepository.findById(note.getNoteId());
+    public Optional<Note> updateContent(NoteContentRequest request) {
+        Optional<Note> changingNote = noteRepository.findById(request.getNoteId());
         Note noteUpdated = changingNote.orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Note not found"));
 
-        noteUpdated.setContent(note.getContent());
+        noteUpdated.setContent(request.getContent());
+        noteUpdated.setModifiedDate(LocalDate.now());
 
-        return noteRepository.save(noteUpdated).toString();
+        return Optional.of(noteRepository.save(noteUpdated));
     }
 
     @Override

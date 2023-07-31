@@ -15,6 +15,8 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 @CrossOrigin(origins = "*", maxAge = 3600)
 @RestController
@@ -64,6 +66,17 @@ public class ProjectController {
     @GetMapping("/members/{id}")
     public ResponseEntity<List<Optional<User>>> getListMember(@PathVariable("id") String projectId){
         return ResponseEntity.ok(projectService.findMemberById(projectId, Role.MEMBER));
+    }
+
+    @GetMapping("/users/{id}")
+    public ResponseEntity<List<Optional<User>>> getListUsers(@PathVariable("id") String projectId){
+        List<Optional<User>> members = projectService.findMemberById(projectId, Role.MEMBER);
+        List<Optional<User>> managers = projectService.findMemberById(projectId, Role.MANAGER);
+
+        List<Optional<User>> users = Stream.concat(members.stream(), managers.stream())
+                .collect(Collectors.toList());
+
+        return ResponseEntity.ok(users);
     }
 
     @GetMapping("/memberIds/{id}")

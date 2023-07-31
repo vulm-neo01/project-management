@@ -17,7 +17,6 @@ import dev.com.projectmanagement.repository.TaskRepository;
 import dev.com.projectmanagement.repository.UserRepository;
 import dev.com.projectmanagement.service.AuthService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -83,7 +82,7 @@ public class AuthImpl implements AuthService {
         task.setEndDate(LocalDate.now().plusDays(2));
         task.setMemberIds(Collections.singletonList(createdUser.getUserId()));
         task.setDocIds(Collections.singletonList("64ae76d344d61231a7c82e02"));
-        task.getComments().add("First Comment");
+//        task.getDiscussions().add("First Comment");
 
         Task createdTask = taskRepository.save(task);
 
@@ -111,6 +110,8 @@ public class AuthImpl implements AuthService {
         note.setCreatedDate(LocalDate.now());
         note.setModifiedDate(LocalDate.now());
         note.setAlertTime(LocalDateTime.now().plusDays(2));
+        note.setProject(createdProject);
+        note.setTask(createdTask);
 
         Note createdNote = noteRepository.save(note);
 

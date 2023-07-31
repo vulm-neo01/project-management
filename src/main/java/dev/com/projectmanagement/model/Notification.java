@@ -18,6 +18,7 @@ public class Notification {
     private String notificationId;
     private NotificationType type;
     private String projectId;
+    private String taskId;
     private String inviterId;
     private String inviterName;
     private Role role;

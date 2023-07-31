@@ -30,7 +30,7 @@ public class Task {
     private LocalDate endDate;
     private List<String> memberIds;
     private List<String> docIds;
-    private List<String> comments;
+    private List<String> discussionIds;
 
     public Task(String description, String taskName, Priority priority, String createdId, String projectId) {
         this.description = description;
@@ -54,10 +54,6 @@ public class Task {
         this.endDate = endDate;
     }
 
-    public Task(List<String> comments){
-        this.comments = comments;
-    }
-
     public List<String> getMemberIds() {
         if (this.memberIds == null) {
             this.memberIds = new ArrayList<>();
@@ -72,10 +68,10 @@ public class Task {
         return this.docIds;
     }
 
-    public List<String> getComments() {
-        if (this.comments == null) {
-            this.comments = new ArrayList<>();
+    public List<String> getDiscussionIds() {
+        if (this.discussionIds == null) {
+            this.discussionIds = new ArrayList<>();
         }
-        return this.comments;
+        return this.discussionIds;
     }
 }

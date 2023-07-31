@@ -4,10 +4,12 @@ import dev.com.projectmanagement.model.Notification;
 import dev.com.projectmanagement.model.Project;
 import dev.com.projectmanagement.model.User;
 import dev.com.projectmanagement.model.request.NotificationRequest;
+import dev.com.projectmanagement.model.request.TaskRequest;
 import dev.com.projectmanagement.model.stable.NotiState;
 import dev.com.projectmanagement.model.stable.NotificationType;
 import dev.com.projectmanagement.repository.NotificationRepository;
 import dev.com.projectmanagement.repository.ProjectRepository;
+import dev.com.projectmanagement.repository.TaskRepository;
 import dev.com.projectmanagement.repository.UserRepository;
 import dev.com.projectmanagement.service.NotifyService;
 import lombok.RequiredArgsConstructor;
@@ -22,9 +24,14 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 @Service
 @RequiredArgsConstructor
 public class NotifyImpl implements NotifyService {
+
+    private static final Logger logger = LoggerFactory.getLogger(NotifyImpl.class);
     @Autowired
     private ProjectRepository projectRepository;
 
@@ -34,6 +41,9 @@ public class NotifyImpl implements NotifyService {
     @Autowired
     private NotificationRepository notificationRepository;
 
+    @Autowired
+    private TaskRepository taskRepository;
+
     @Override
     public Notification sendInvite(Notification notification) {
         notification.setState(NotiState.UNREAD);
@@ -42,7 +52,7 @@ public class NotifyImpl implements NotifyService {
     }
 
     @Override
-    public Optional<NotiState> receiveInvite(NotificationRequest request) {
+    public Optional<NotiState> receiveInviteProject(NotificationRequest request) {
         String notificationId = request.getNotificationId();
         NotiState state = request.getState();
         Optional<Notification> notification = notificationRepository.findById(notificationId);
@@ -86,5 +96,17 @@ public class NotifyImpl implements NotifyService {
                 .map(Optional::of)
                 .collect(Collectors.toList());
         return unreadNotification;
+    }
+
+    @Override
+    public Optional<Notification> receiveInviteTask(NotificationRequest request) {
+        String notificationId = request.getNotificationId();
+        logger.info(request.toString());
+        Optional<Notification> notification = notificationRepository.findById(notificationId);
+        Notification updatedNotification = notification.orElseThrow(() -> new RuntimeException("Notification not found"));
+        updatedNotification.setState(NotiState.READ);
+        notificationRepository.save(updatedNotification);
+
+        return Optional.of(updatedNotification);
     }
 }

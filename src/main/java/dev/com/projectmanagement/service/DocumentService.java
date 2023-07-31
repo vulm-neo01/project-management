@@ -30,14 +30,15 @@ public interface DocumentService {
 //
 //    void delete(String id);
 
-    String store(MultipartFile file, String projectId) throws IOException;
+    String storeToProject(MultipartFile file, String projectId) throws IOException;
 
-
+    String storeToTask(MultipartFile file, String taskId) throws IOException;
     byte[] downloadFile(String id);
 
     Document getFile(String id);
 
     Stream<Document> getAllFiles();
+
 
 //    Path load(String filename);
 //

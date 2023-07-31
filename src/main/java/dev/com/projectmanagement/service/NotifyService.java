@@ -11,7 +11,9 @@ public interface NotifyService {
 
     Notification sendInvite(Notification notification);
 
-    Optional<NotiState> receiveInvite(NotificationRequest request);
+    Optional<NotiState> receiveInviteProject(NotificationRequest request);
 
     List<Optional<Notification>> getAllUnread();
+
+    Optional<Notification> receiveInviteTask(NotificationRequest request);
 }

@@ -9,9 +9,11 @@ import dev.com.projectmanagement.model.stable.Role;
 import dev.com.projectmanagement.repository.ProjectRepository;
 import dev.com.projectmanagement.repository.UserRepository;
 import dev.com.projectmanagement.service.UserService;
+import dev.com.projectmanagement.service.jwt.UserDetailsServiceImpl;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -33,10 +35,10 @@ public class UserImpl implements UserService{
     private UserRepository userRepository;
 
     @Autowired
-    private ProjectRepository projectRepository;
+    private PasswordEncoder passwordEncoder;
 
     @Autowired
-    private PasswordEncoder passwordEncoder;
+    private UserDetailsServiceImpl userDetailsService;
 
 
     @Override
@@ -48,16 +50,6 @@ public class UserImpl implements UserService{
     public Optional<User> findById(String id) {
         return userRepository.findById(id);
     }
-
-//    @Override
-//    public User saveUser(User user) {
-//        if(userRepository.findByEmail(user.getEmail()) != null){
-//            throw  new RuntimeException("Email existence!");
-//        }
-//        String encodePassword = passwordEncoder.encode(user.getPassword());
-//        user.setPassword(encodePassword);
-//        return userRepository.insert(user);
-//    }
 
     @Override
     public User updateUser(User user) {
@@ -76,7 +68,6 @@ public class UserImpl implements UserService{
         changingUser.setUsername(user.getUsername());
         changingUser.setAddress(user.getAddress());
         return userRepository.save(changingUser);
-//        return null;
     }
 
     @Override
@@ -88,7 +79,12 @@ public class UserImpl implements UserService{
         Optional<User> user = userRepository.findByEmail(email);
         User userToChange = user.orElseThrow(() -> new UsernameNotFoundException("User not found"));
         userToChange.setPassword(passwordEncoder.encode(password));
-        return userRepository.save(userToChange);
+        userRepository.save(userToChange);
+
+        UserDetails newPrincipal = userDetailsService.loadUserByUsername(email);
+        Authentication newAuthentication = new UsernamePasswordAuthenticationToken(newPrincipal, newPrincipal.getPassword(), newPrincipal.getAuthorities());
+        SecurityContextHolder.getContext().setAuthentication(newAuthentication);
+        return userToChange;
     }
 
     @Override
@@ -104,29 +100,5 @@ public class UserImpl implements UserService{
         Optional<User> user = userRepository.findById(userId);
         return user;
     }
-
-//    @Override
-//    public LoginMessage loginUser(LoginRequest loginRequest) {
-//        String msg = "";
-//        Optional<User> loginUser = userRepository.findByEmail(loginRequest.getEmail());
-//        User user = loginUser.orElseThrow(() -> new UsernameNotFoundException("User not found"));
-//        if(user != null){
-//            String password = loginRequest.getPassword();
-//            String encodePassword = user.getPassword();
-//            Boolean isRightPassword = passwordEncoder.matches(password, encodePassword);
-//            if(isRightPassword){
-//                Optional<User> user1 = userRepository.findOneByEmailAndPassword(loginRequest.getEmail(), encodePassword);
-//                if(user1.isPresent()){
-//                    return new LoginMessage("Login success", true);
-//                } else {
-//                    return new LoginMessage("Login Failed", false);
-//                }
-//            } else {
-//                return new LoginMessage("Password not match", false);
-//            }
-//        } else {
-//            return new LoginMessage("Email not exists!", false);
-//        }
-//    }
 
 }

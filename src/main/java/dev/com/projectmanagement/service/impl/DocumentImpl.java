@@ -2,8 +2,10 @@ package dev.com.projectmanagement.service.impl;
 
 import dev.com.projectmanagement.model.Document;
 import dev.com.projectmanagement.model.Project;
+import dev.com.projectmanagement.model.Task;
 import dev.com.projectmanagement.repository.DocumentRepository;
 import dev.com.projectmanagement.repository.ProjectRepository;
+import dev.com.projectmanagement.repository.TaskRepository;
 import dev.com.projectmanagement.service.DocumentService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -26,8 +28,11 @@ public class DocumentImpl implements DocumentService {
     @Autowired
     ProjectRepository projectRepository;
 
+    @Autowired
+    TaskRepository taskRepository;
+
     @Override
-    public String store(MultipartFile file, String projectId) throws IOException {
+    public String storeToProject(MultipartFile file, String projectId) throws IOException {
         Document document = documentRepository.save(Document.builder()
                         .name(file.getOriginalFilename())
                         .rootId(projectId) // Cần sửa lại, test tạm thời
@@ -42,6 +47,29 @@ public class DocumentImpl implements DocumentService {
         Project projectToUpdate = changingProject.orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Project not found"));
         projectToUpdate.getDocIds().add(document.getDocId());
         projectRepository.save(projectToUpdate);
+
+        if(document != null){
+            return "file upload successfully: " + file.getOriginalFilename();
+        }
+        return "File upload fail";
+    }
+
+    @Override
+    public String storeToTask(MultipartFile file, String taskId) throws IOException {
+        Document document = documentRepository.save(Document.builder()
+                .name(file.getOriginalFilename())
+                .rootId(taskId) // Cần sửa lại, test tạm thời
+                .description("")
+                .docData(file.getBytes())
+                .type(file.getContentType())
+                .uploadBy(String.valueOf(SecurityContextHolder.getContext().getAuthentication().getPrincipal()))
+                .uploadDate(LocalDate.now())
+                .build());
+
+        Optional<Task> changingTask = taskRepository.findById(taskId);
+        Task updatedTask = changingTask.orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Task not found"));
+        updatedTask.getDocIds().add(document.getDocId());
+        taskRepository.save(updatedTask);
 
         if(document != null){
             return "file upload successfully: " + file.getOriginalFilename();

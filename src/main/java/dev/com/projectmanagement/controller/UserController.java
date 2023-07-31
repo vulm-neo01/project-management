@@ -68,6 +68,8 @@ public class UserController {
         return ResponseEntity.ok(userService.getUserInfo(userId));
     }
 
+
+
     @GetMapping("/projects")
     public ResponseEntity<List<Optional<Project>>> getProjects(){
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
