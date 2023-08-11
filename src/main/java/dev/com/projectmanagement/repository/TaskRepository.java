@@ -10,4 +10,6 @@ import java.util.Optional;
 @Repository
 public interface TaskRepository extends MongoRepository<Task, String> {
     List<Optional<Task>> findByTaskIdIn(List<String> taskIds);
+
+    void deleteAllByProjectId(String projectId);
 }

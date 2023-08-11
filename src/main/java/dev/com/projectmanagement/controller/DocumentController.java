@@ -29,7 +29,7 @@ public class DocumentController {
     @Autowired
     private final DocumentService documentService;
 
-    @PostMapping("/project")
+        @PostMapping("/project")
     public ResponseEntity<String> handleFileUpload(@RequestParam("file") MultipartFile file,@RequestParam("projectId") String projectId) throws IOException {
         // Kiểm tra loại file
         String fileName = file.getOriginalFilename();

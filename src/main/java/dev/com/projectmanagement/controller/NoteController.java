@@ -30,7 +30,7 @@ public class NoteController {
     }
 
     @GetMapping("/alert")
-    public ResponseEntity<Optional<Note>> getNote(){
+    public ResponseEntity<Optional<Note>> alertNote(){
         return ResponseEntity.ok(noteService.alertNote());
     }
 

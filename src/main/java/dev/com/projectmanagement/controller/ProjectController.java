@@ -53,7 +53,7 @@ public class ProjectController {
     }
 
     @PostMapping("/memberToManager")
-    public ResponseEntity<String> updateProject(@RequestBody MemberToManager request){
+    public ResponseEntity<String> updateMemberToManager(@RequestBody MemberToManager request){
         return ResponseEntity.ok(projectService.changeToManager(request));
     }
 

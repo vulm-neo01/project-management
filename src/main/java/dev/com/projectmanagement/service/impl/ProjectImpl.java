@@ -1,18 +1,13 @@
 package dev.com.projectmanagement.service.impl;
 
-import dev.com.projectmanagement.model.Document;
-import dev.com.projectmanagement.model.Notification;
-import dev.com.projectmanagement.model.Project;
-import dev.com.projectmanagement.model.User;
+import dev.com.projectmanagement.model.*;
 import dev.com.projectmanagement.model.request.MemberToManager;
 import dev.com.projectmanagement.model.stable.NotiState;
 import dev.com.projectmanagement.model.stable.NotificationType;
 import dev.com.projectmanagement.model.stable.Role;
-import dev.com.projectmanagement.repository.DocumentRepository;
-import dev.com.projectmanagement.repository.NotificationRepository;
-import dev.com.projectmanagement.repository.ProjectRepository;
-import dev.com.projectmanagement.repository.UserRepository;
+import dev.com.projectmanagement.repository.*;
 import dev.com.projectmanagement.service.ProjectService;
+import dev.com.projectmanagement.service.TaskService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -41,6 +36,9 @@ public class ProjectImpl implements ProjectService {
 
     @Autowired
     private final NotificationRepository notificationRepository;
+
+    @Autowired
+    private final TaskService taskService;
 
     @Override
     public List<Project> findAll(){
@@ -96,17 +94,23 @@ public class ProjectImpl implements ProjectService {
         if(!projectRepository.existsById(id)){
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "ID is not existence!");
         }
-        projectRepository.deleteById(id);
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        UserDetails userDetails = (UserDetails) authentication.getPrincipal();
-        String email = userDetails.getUsername();
-
-        Optional<User> user = repository.findByEmail(email);
-        if(user.isPresent()){
-            User userUpdated = user.get();
-            userUpdated.getProjectIds().remove(id);
-            repository.save(userUpdated);
+        Project project = projectRepository.findById(id).get();
+        List<String> taskIds = project.getTaskIds();
+        for (String taskId : taskIds) {
+            taskService.delete(taskId);
         }
+
+        Set<String> userIds = project.getUsers().keySet();
+        for (String key : userIds) {
+            Optional<User> user = repository.findById(key);
+            if(user.isPresent()){
+                User userUpdated = user.get();
+                userUpdated.getProjectIds().remove(id);
+                repository.save(userUpdated);
+            }
+        }
+
+        projectRepository.deleteById(id);
     }
 
     @Override

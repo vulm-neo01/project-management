@@ -97,17 +97,19 @@ public class TaskImpl implements TaskService {
         if(!taskRepository.existsById(id)){
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "ID is not existence!");
         }
-        taskRepository.deleteById(id);
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        UserDetails userDetails = (UserDetails) authentication.getPrincipal();
-        String email = userDetails.getUsername();
+        Task task = taskRepository.findById(id).get();
+        List<String> userIds = task.getMemberIds();
 
-        Optional<User> user = repository.findByEmail(email);
-        if(user.isPresent()){
-            User userUpdated = user.get();
-            userUpdated.getTaskIds().remove(id);
-            repository.save(userUpdated);
+        for(String userId : userIds){
+            Optional<User> user = repository.findById(userId);
+            if(user.isPresent()){
+                User userUpdated = user.get();
+                userUpdated.getTaskIds().remove(id);
+                repository.save(userUpdated);
+            }
         }
+
+        taskRepository.deleteById(id);
     }
 
     @Override
